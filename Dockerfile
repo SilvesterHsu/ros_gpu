@@ -143,7 +143,7 @@ RUN pip --no-cache-dir install \
 
 # Install TensorFlow GPU version.
 RUN pip --no-cache-dir install \
-    tensorflow-gpu==1.9.0
+    tensorflow-gpu==1.12.0
 # --- ~ DO NOT EDIT OR DELETE BETWEEN THE LINES --- #
 
 # RUN ln -s -f /usr/bin/python3 /usr/bin/python#
@@ -296,7 +296,9 @@ RUN echo "source /opt/ros/melodic/setup.bash" >> /root/.bashrc \
     && echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
 
 # =======================================================================
+RUN pip3 install opencv-python tqdm imutils
 
+# =======================================================================
 # TensorBoard
 EXPOSE 6006
 # IPython
