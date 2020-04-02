@@ -43,7 +43,7 @@ sudo systemctl restart docker
 
 ### Step 1: Use docker for quick start
 ```bash
-docker run -it --name ros --restart=always -p $PORT:6606 -p $PORT:8888 -p $PORT:80 -v "$PWD":/notebooks silvesterhsu/ros-gpu:"$TAG"
+docker run -it --name ros --restart=always --gpus all -p $PORT:6606 -p $PORT:8888 -p $PORT:80 -v "$PWD":/notebooks silvesterhsu/ros-gpu:"$TAG"
 ```
 `$PORT`: Port mapping. It is the port that needs to link the local to the image. In docker, jupyter will open port 8888 as a web access. If the local port 8888 is not occupied, it is recommended to use 8888. Similarly, 6006 is the port of tensorboard and 80 is the port of browser.
 
@@ -53,7 +53,7 @@ docker run -it --name ros --restart=always -p $PORT:6606 -p $PORT:8888 -p $PORT:
 
 **Example:**
 ```bash
-docker run -it --name ros --restart=always -p 6006:6606 -p 8888:8888 -p 6080:80 -v ~/new_project:/notebooks silvesterhsu/ros-gpu
+docker run -it --name ros --restart=always --gpus all -p 6006:6606 -p 8888:8888 -p 6080:80 -v ~/new_project:/notebooks silvesterhsu/ros-gpu
 ```
 ### Step 2: Access through browser and vnc viewer
 
