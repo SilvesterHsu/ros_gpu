@@ -1,15 +1,11 @@
 ### Dockerfile with Ubuntu 18.04 and cuda 9.0
-### Changes are indicated by CHANGED
-### Everything else was copied together from the original Dockerfiles (as per comments)
 
-### 1st part from https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/10.0/base/Dockerfile
+# part from https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/10.0/base/Dockerfile
 
 FROM ubuntu:18.04
-# CHANGED
-#LABEL maintainer "NVIDIA CORPORATION <cudatools@nvidia.com>"
-LABEL maintainer="tobycheese https://github.com/tobycheese/"
 
-# CHANGED: below, add the two repos from 17.04 and 16.04 so all packages are found
+LABEL maintainer="SilvesterHsu https://github.com/SilvesterHsu/"
+
 RUN apt-get update && apt-get install -y --no-install-recommends gnupg2 curl ca-certificates && \
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
     echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \
@@ -19,10 +15,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg2 curl ca-
     apt-get purge --autoremove -y curl && \
     rm -rf /var/lib/apt/lists/*
 
-### end 1st part from from https://gitlab.com/nvidia/cuda/blob/ubuntu18.04/10.0/base/Dockerfile
-
-### 2nd part from https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/base/Dockerfile
-
 ENV CUDA_VERSION 9.0.176
 
 ENV CUDA_PKG_VERSION 9-0=$CUDA_VERSION-1
@@ -30,11 +22,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         cuda-cudart-$CUDA_PKG_VERSION && \
     ln -s cuda-9.0 /usr/local/cuda && \
     rm -rf /var/lib/apt/lists/*
-
-# CHANGED: commented out
-# nvidia-docker 1.0
-#LABEL com.nvidia.volumes.needed="nvidia_driver"
-#LABEL com.nvidia.cuda.version="${CUDA_VERSION}"
 
 RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
@@ -47,10 +34,6 @@ ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 ENV NVIDIA_REQUIRE_CUDA "cuda>=9.0"
 
-### end 2nd part from https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/base/Dockerfile
-
-### all of https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/runtime/Dockerfile
-
 ENV NCCL_VERSION 2.3.7
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -59,10 +42,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libnccl2=$NCCL_VERSION-1+cuda9.0 && \
     apt-mark hold libnccl2 && \
     rm -rf /var/lib/apt/lists/*
-
-### end all of from https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/runtime/Dockerfile
-
-### all of https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/devel/Dockerfile
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         cuda-libraries-dev-$CUDA_PKG_VERSION \
@@ -76,10 +55,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs
 
-### end all of https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/devel/Dockerfile
-
-### all of https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/devel/cudnn7/Dockerfile
-
 ENV CUDNN_VERSION 7.4.1.5
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 
@@ -88,8 +63,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
             libcudnn7-dev=$CUDNN_VERSION-1+cuda9.0 && \
     apt-mark hold libcudnn7 && \
     rm -rf /var/lib/apt/lists/*
-
-### end all of https://gitlab.com/nvidia/cuda/blob/ubuntu16.04/9.0/devel/cudnn7/Dockerfile
 
 # =======================================================================
 # Tensorflow
@@ -135,35 +108,19 @@ RUN pip --no-cache-dir install \
         && \
     python3 -m ipykernel.kernelspec
 
-# --- DO NOT EDIT OR DELETE BETWEEN THE LINES --- #
-# These lines will be edited automatically by parameterized_docker_build.sh. #
-# COPY _PIP_FILE_ /
-# RUN pip --no-cache-dir install /_PIP_FILE_
-# RUN rm -f /_PIP_FILE_
-
-# Install TensorFlow GPU version.
 RUN pip --no-cache-dir install \
     tensorflow-gpu==1.12.0
-# --- ~ DO NOT EDIT OR DELETE BETWEEN THE LINES --- #
 
-# RUN ln -s -f /usr/bin/python3 /usr/bin/python#
-
-# Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
 
-# Copy sample notebooks.
 COPY notebooks /notebooks
 
-# Jupyter has issues with being run directly:
-#   https://github.com/ipython/ipython/issues/7062
-# We just add a little wrapper script.
 COPY run_jupyter.sh /
 
-# For CUDA profiling, TensorFlow requires CUPTI.
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 
 # =======================================================================
-# gpflow
+# GPflow
 
 RUN pip install gpflow==1.3.0 && \
     pip install jupyter_contrib_nbextensions jupyter_nbextensions_configurator autopep8 && \
@@ -184,7 +141,7 @@ RUN mv /notebooks/* /home/ && \
 COPY doc/source/notebooks/* /notebooks/gpflow-notebooks/
 
 # =======================================================================
-# ROS install
+# ROS
 
 ENV DEBIAN_FRONTEND noninteractive
 # built-in packages
@@ -296,20 +253,18 @@ RUN echo "source /opt/ros/melodic/setup.bash" >> /root/.bashrc \
     && echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
 
 # =======================================================================
+# project essential packages
 RUN pip3 install opencv-python tqdm imutils
 
 # =======================================================================
 # TensorBoard
 EXPOSE 6006
-# IPython
+# Jupyter
 EXPOSE 8888
+# VNC
+EXPOSE 80
 
 WORKDIR "/notebooks"
-
-EXPOSE 80
-#WORKDIR /root
 ENV HOME=/home/ubuntu \
     SHELL=/bin/bash
 ENTRYPOINT ["/startup.sh"]
-
-#CMD ["/run_jupyter.sh", "--allow-root"]
