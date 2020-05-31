@@ -39,7 +39,7 @@ ENV NVIDIA_REQUIRE_CUDA "cuda>=10.1 brand=tesla,driver>=384,driver<385 brand=tes
 # ========================== Pytorch ==========================
 #
 
-RUN pip3 install torch torchvision
+RUN pip3 install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 
 #
 # ========================== GPflow ==========================
