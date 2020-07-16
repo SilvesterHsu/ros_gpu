@@ -36,16 +36,24 @@ ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 ENV NVIDIA_REQUIRE_CUDA "cuda>=10.1 brand=tesla,driver>=384,driver<385 brand=tesla,driver>=396,driver<397 brand=tesla,driver>=410,driver<411"
 
 #
-# ========================== Pytorch ==========================
+# ========================== Pytorch + Dependent ==========================
 #
 
 RUN pip3 install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip3 install tqdm imutils gpytorch ipywidgets
 
 #
-# ========================== GPflow ==========================
+# ========================== Jupyter ==========================
 #
-
-RUN pip3 install gpflow==1.3.0
+RUN pip3 install tornado -U
+RUN pip3 install jupyter_contrib_nbextensions jupyter_nbextensions_configurator \
+    && jupyter contrib nbextension install --user \
+    && jupyter nbextensions_configurator enable --user \
+    && jupyter nbextension enable splitcell/splitcell \
+    && jupyter nbextension enable codefolding/main \
+    && jupyter nbextension enable execute_time/ExecuteTime \
+    && jupyter nbextension enable snippets_menu/main \
+    && jupyter nbextension enable toggle_all_line_numbers/main
 
 #
 # ========================== Tool ==========================
@@ -93,6 +101,10 @@ RUN pip install setuptools wheel && pip install -r /usr/lib/web/requirements.txt
 RUN cp /usr/share/applications/terminator.desktop /root/Desktop
 
 # =======================================================================
+# Add user for jupyter notebook
+RUN useradd -ms /bin/bash seel
+
+# =======================================================================
 # TensorBoard
 EXPOSE 6006
 # Jupyter
@@ -100,7 +112,8 @@ EXPOSE 8888
 # VNC
 EXPOSE 80
 
+#USER seel
 WORKDIR "/notebooks"
-ENV HOME=/home/ubuntu \
+ENV HOME=/home/seel \
     SHELL=/bin/bash
 ENTRYPOINT ["/startup.sh"]
