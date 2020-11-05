@@ -1,119 +1,49 @@
+FROM debian:buster-slim as build
+
+# Essential tools
+RUN apt update && \
+    apt install wget -y
+
+# cudnn file
+RUN wget http://jupi.ink:83/cudnn-11.0-linux-x64-v8.0.4.30.tgz && \
+    tar -xzvf cudnn-11.0-linux-x64-v8.0.4.30.tgz
+
+
 FROM silvesterhsu/base_ros
 
 #
 # ========================== CUDA Setup ==========================
 #
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-gnupg2 curl ca-certificates && \
-    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
-    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \
-    echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list && \
-    apt-get purge --autoremove -y curl && \
+ENV CUDA_VERSION 11.0.3
+
+ENV CUDA_PKG_VERSION $CUDA_VERSION-1
+
+RUN apt-get update && apt-get install -y wget software-properties-common \
+    gnupg2 curl ca-certificates && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
+    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub && \
+    add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" && \
+    apt-get update && apt-get -y install cuda=$CUDA_PKG_VERSION && \
 rm -rf /var/lib/apt/lists/*
 
-ENV CUDA_VERSION 10.1.243
-
-ENV CUDA_PKG_VERSION 10-1=$CUDA_VERSION-1
-
-# For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        cuda-cudart-$CUDA_PKG_VERSION \
-cuda-compat-10-1 && \
-ln -s cuda-10.1 /usr/local/cuda && \
-    rm -rf /var/lib/apt/lists/*
-
-# Required for nvidia-docker v1
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
-    echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${PATH}
-ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
-
-# nvidia-container-runtime
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-ENV NVIDIA_REQUIRE_CUDA "cuda>=10.1 brand=tesla,driver>=384,driver<385 brand=tesla,driver>=396,driver<397 brand=tesla,driver>=410,driver<411"
+RUN echo 'export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}' >> ~/.bashrc && \
+    echo 'export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}' >> ~/.zshrc
 
 #
-# ========================== Pytorch + Dependent ==========================
+# ========================== cudnn Setup ==========================
 #
 
-RUN pip3 install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip3 install tqdm imutils gpytorch ipywidgets
+COPY --from=build /cuda/ /cuda/
+
+RUN cp cuda/include/cudnn*.h /usr/local/cuda/include && \
+    cp cuda/lib64/libcudnn* /usr/local/cuda/lib64 && \
+    chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn* && \
+    rm -rf cuda
 
 #
-# ========================== Jupyter ==========================
-#
-RUN pip3 install tornado -U
-RUN pip3 install jupyter_contrib_nbextensions jupyter_nbextensions_configurator \
-    && jupyter contrib nbextension install --user \
-    && jupyter nbextensions_configurator enable --user \
-    && jupyter nbextension enable splitcell/splitcell \
-    && jupyter nbextension enable codefolding/main \
-    && jupyter nbextension enable execute_time/ExecuteTime \
-    && jupyter nbextension enable snippets_menu/main \
-    && jupyter nbextension enable toggle_all_line_numbers/main
-
-#
-# ========================== Tool ==========================
+# ===================== Pytorch + Dependent ======================
 #
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends software-properties-common curl \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends --allow-unauthenticated \
-        supervisor \
-        openssh-server pwgen sudo vim-tiny \
-        net-tools \
-        lxde x11vnc xvfb \
-        gtk2-engines-murrine ttf-ubuntu-font-family \
-        firefox \
-        nginx \
-        python3-dev build-essential \
-        python-dev \
-        mesa-utils libgl1-mesa-dri \
-        gnome-themes-standard gtk2-engines-pixbuf gtk2-engines-murrine pinta arc-theme \
-        dbus-x11 x11-utils \
-        terminator \
-    && apt-get autoclean \
-    && apt-get autoremove \
-    && rm -rf /var/lib/apt/lists/*
-
-# user tools
-RUN apt-get update && apt-get install -y \
-    terminator \
-    gedit \
-    okular \
-    vim \
-    nano \
-    wget \
-    && apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# tini for subreap
-ENV TINI_VERSION v0.9.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /bin/tini
-RUN chmod +x /bin/tini
-
-ADD image /
-RUN pip install setuptools wheel && pip install -r /usr/lib/web/requirements.txt
-RUN cp /usr/share/applications/terminator.desktop /root/Desktop
-
-# =======================================================================
-# Add user for jupyter notebook
-RUN useradd -ms /bin/bash seel
-
-# =======================================================================
-# TensorBoard
-EXPOSE 6006
-# Jupyter
-EXPOSE 8888
-# VNC
-EXPOSE 80
-
-#USER seel
-WORKDIR "/notebooks"
-ENV HOME=/home/seel \
-    SHELL=/bin/bash
-ENTRYPOINT ["/startup.sh"]
+RUN pip install torch==1.7.0+cu110 torchvision==0.8.1+cu110 torchaudio===0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
