@@ -62,15 +62,8 @@ RUN apt update && sudo apt install python2.7 -y && \
 
 RUN cp /usr/share/applications/terminator.desktop /root/Desktop
 
-#RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python && \
-#    rm /usr/bin/pip /usr/local/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
-
-# =======================================================================
-# Add user for jupyter notebook
-RUN useradd -ms /bin/bash seel
-
-RUN echo "source /opt/ros/noetic/setup.bash" >> /home/seel/.bashrc && \
-    echo "source /opt/ros/noetic/setup.zsh" >> /home/seel/.zshrc
+RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python && \
+    rm /usr/bin/pip /usr/local/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
 
 # =======================================================================
 # TensorBoard
@@ -82,6 +75,6 @@ EXPOSE 80
 
 #USER seel
 WORKDIR "/notebooks"
-ENV HOME=/home/seel \
+ENV HOME=/root \
     SHELL=/bin/bash
 ENTRYPOINT ["/startup.sh"]
