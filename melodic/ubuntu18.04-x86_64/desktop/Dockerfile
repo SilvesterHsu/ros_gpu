@@ -1,4 +1,4 @@
-FROM silvesterhsu/base_ros
+FROM silvesterhsu/ros_gpu:melodic-base
 
 #
 # ========================== CUDA Setup ==========================
