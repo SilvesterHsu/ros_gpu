@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y \
     vim \
     nano \
     wget \
-    rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 # tini for subreap
 ENV TINI_VERSION v0.9.0
@@ -62,15 +62,15 @@ RUN apt update && sudo apt install python2.7 -y && \
 
 RUN cp /usr/share/applications/terminator.desktop /root/Desktop
 
-RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python && \
-    rm /usr/bin/pip /usr/local/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
-
-RUN echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc && \
-    echo "source /opt/ros/noetic/setup.zsh" >> ~/.zshrc
+#RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python && \
+#    rm /usr/bin/pip /usr/local/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
 
 # =======================================================================
 # Add user for jupyter notebook
 RUN useradd -ms /bin/bash seel
+
+RUN echo "source /opt/ros/noetic/setup.bash" >> /home/seel/.bashrc && \
+    echo "source /opt/ros/noetic/setup.zsh" >> /home/seel/.zshrc
 
 # =======================================================================
 # TensorBoard
