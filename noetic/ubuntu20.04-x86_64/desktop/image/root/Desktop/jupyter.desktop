@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Jupyter
+Comment=Jupyter
+Exec=bash -c "cd /notebooks && jupyter notebook --ip=0.0.0.0 --allow-root"
+Icon=/usr/share/jupyter.png
+Type=Application
+Categories=GNOME;GTK;Utility;TerminalEmulator;System;
+StartupNotify=false
+Keywords=terminal;shell;prompt;command;commandline;
+Terminal=true
