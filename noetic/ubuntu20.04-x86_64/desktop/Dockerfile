@@ -76,5 +76,6 @@ EXPOSE 80
 #USER seel
 WORKDIR "/notebooks"
 ENV HOME=/root \
-    SHELL=/bin/bash
+    SHELL=/bin/bash \
+    RESOLUTION=2738x1434
 ENTRYPOINT ["/startup.sh"]
