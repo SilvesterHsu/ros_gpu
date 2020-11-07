@@ -62,8 +62,8 @@ RUN apt update && sudo apt install python2.7 -y && \
 
 RUN cp /usr/share/applications/terminator.desktop /root/Desktop
 
-RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python && \
-    rm /usr/bin/pip /usr/local/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
+#RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python && \
+#    rm /usr/bin/pip /usr/local/bin/pip && ln -s /usr/bin/pip3 /usr/bin/pip
 
 # =======================================================================
 # TensorBoard
