@@ -1,6 +1,8 @@
 #!/bin/bash
 
 mkdir -p /var/run/sshd
+# remove pip to set default pip to pip3
+rm /usr/local/bin/pip
 
 #chown -R root:root /root
 mkdir -p /root/.config/pcmanfm/LXDE/
