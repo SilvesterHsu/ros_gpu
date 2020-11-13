@@ -4,9 +4,10 @@ FROM silvesterhsu/ros_gpu:noetic-cuda11.0-runtime
 # ========================== Jupyter ==========================
 #
 RUN pip3 install tornado -U
-RUN pip3 install jupyter_contrib_nbextensions jupyter_nbextensions_configurator \
+RUN pip3 install jupyter_contrib_nbextensions jupyter_nbextensions_configurator ipywidgets \
     && jupyter contrib nbextension install --user \
     && jupyter nbextensions_configurator enable --user \
+    && jupyter nbextension enable --py widgetsnbextension \
     && jupyter nbextension enable splitcell/splitcell \
     && jupyter nbextension enable codefolding/main \
     && jupyter nbextension enable execute_time/ExecuteTime \
