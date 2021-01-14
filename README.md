@@ -129,3 +129,22 @@ source /opt/ros/noetic/setup.bash
 ```
 ### Step 4: Terminal (optional)
 Connect via `docker exec -it ros /bin/bash`.
+
+
+
+## Remote usage for Sheffield student
+
+### Lab GPU sever
+For a Lab GPU server with ip `xxxx.xxxx.xxxx.xxxx`
+
+1. connect to the server through `ssh name@xxxx.xxxx.xxxx.xxxx`
+
+2. Run docker to create new repository for yourself `docker run -it --name ros_$YOURNAME --restart=always --gpus all --shm-size=32G -p $TensorboardPORT:6606 -p $JupyterPORT:8888 -p $VNCPORT:80 -v $PWD:/notebooks silvesterhsu/ros_gpu:noetic-desktop-ubuntu20.04`
+
+   > Replace \$YOURNAME, \$TensorboardPORT, ​\$JupyterPORT, ​\$VNCPORT,  ​\$PWD to avoid conflicts when used by multiple students
+
+3. Visit the Lab GPU server through **browser !!!**
+	
+	* Remote Desktop: `xxxx.xxxx.xxxx.xxxx:$VNCPORT`
+	* Jupyter: `xxxx.xxxx.xxxx.xxxx:$JupyterPORT`
+	* TensorBoard: `xxxx.xxxx.xxxx.xxxx:$TensorboardPORT`
