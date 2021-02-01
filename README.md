@@ -78,6 +78,8 @@ sudo systemctl restart docker
 
 <img src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmmzi72djij31hc0u0h0j.jpg" width = "100%" />
 
+<img src="https://tva1.sinaimg.cn/large/008eGmZEgy1gn8ensejb7j31400mawl3.jpg" width = "100%" />
+
 > VNC is turned on automatically by default, however Jupyter notebook will not started by default.
 
 ## How to use?
