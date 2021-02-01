@@ -195,7 +195,7 @@ docker run -it --name ros --restart=always --gpus all --shm-size=32G -p 6006:660
   **Modify file:**
 
   ```shell
-nano ~/iptables.rules
+  nano ~/iptables.rules
   ```
   
   and add rules to the ip of ros container
